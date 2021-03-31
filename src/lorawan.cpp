@@ -6,13 +6,18 @@
 #include "sensorcfg.h"
 #include "maxbotix.h"
 #include <math.h>
-
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 static osjob_t sendjob;
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 unsigned int TX_INTERVAL;
 
+Adafruit_BME280 bme; // I2C
+
 unsigned char cfg_packet[7];
-unsigned char lora_packet[5];
+unsigned char lora_packet[15];
 bool TX_COMPLETED = false;        // Set to false on start and after sleep; is set to true when an uplink is successful
 bool UPDATE_CONFIG = true;        // Set to true at start and when there is a change in sensor cfg; used to send sensor cfg via uplink
 
@@ -43,6 +48,16 @@ void lmicsetup( unsigned int packet_interval = 300) {       //Future setup varia
   LMIC_setDrTxpow(DR_SF7, 14);
   LMIC_selectSubBand(1);
   digitalWrite(13, LOW);
+  Serial.println(F("BME280 test"));
+  unsigned status = bme.begin(0x76, &Wire);
+  if (!status) {
+        Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+        Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
+        Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+        Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+        Serial.print("        ID of 0x60 represents a BME 280.\n");
+        Serial.print("        ID of 0x61 represents a BME 680.\n");
+  }
   Serial.println("Setup Ready!");
   TX_INTERVAL = packet_interval;
   // Start job (sending automatically starts OTAA too)
@@ -408,7 +423,7 @@ unsigned int ERROR_FLAGS;
 
 void prepare_packet(void) {
 
-  byte lowbyte, highbyte, lowbat, highbat;
+  byte lowbyte, highbyte;
   String packet_data;
   // Error
   ERROR_FLAGS = pow(2,0)* SD_ERROR;
@@ -478,18 +493,56 @@ void prepare_packet(void) {
     packet_data = String("Battery Level in mVolts is: ") + String(batlevel);
     writeToSDCard(packet_data);
 
+    // BME280
+    Serial.println("Reading BME.....");
+    float temperature = bme.readTemperature();
+    float pressure = bme.readPressure() / 100.0F;
+    float altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+    float humidity = bme.readHumidity();
+    Serial.println("Reads done");
     // Payload
-    lowbat = lowByte(batlevel);
-    highbat = highByte(batlevel);
+
     lora_packet[0] = (unsigned char)ERROR_FLAGS;
+    Serial.println("error flag done");
+    Serial.println("error flag done");
     packet_data = String("SD Error flag is: ") + String(SD_ERROR);
     writeToSDCard(packet_data);
-    lora_packet[1] = (unsigned char)lowbat; //we're unsigned
-    lora_packet[2] = (unsigned char)highbat;
+    lowbyte = lowByte(batlevel);
+    highbyte = highByte(batlevel);
+    lora_packet[1] = (unsigned char)lowbyte; //we're unsigned
+    lora_packet[2] = (unsigned char)highbyte;
+    Serial.println("batt done");
     lowbyte = lowByte(distance);
     highbyte = highByte(distance);
     lora_packet[3] = (unsigned char)lowbyte;
     lora_packet[4] = (unsigned char)highbyte;
+    Serial.println("dist done");
+    int16_t celciusInt = temperature * 100; // convert to signed 16 bits integer
+    lowbyte = lowByte(celciusInt);
+    highbyte = highByte(celciusInt);
+    lora_packet[5] = (unsigned char)lowbyte;
+    lora_packet[6] = (unsigned char)highbyte;
+    Serial.println("temp done");
+    uint16_t pressureInt = pressure * 100; // convert to unsigned 16 bits integer
+    lowbyte = lowByte(pressureInt);
+    highbyte = highByte(pressureInt);
+    lora_packet[7] = (uint8_t)(pressureInt & 0x000000ff);
+    lora_packet[8] = (uint8_t)(pressureInt & 0x0000ff00) >> 8;
+    lora_packet[9] = (uint8_t)(pressureInt & 0x00ff0000) >> 16;
+    lora_packet[10] = (uint8_t)(pressureInt & 0xff000000) >> 24;
+    Serial.println("press done");
+    uint16_t altitudeInt = altitude * 100; // convert to signed 16 bits integer
+    lowbyte = lowByte(altitudeInt);
+    highbyte = highByte(altitudeInt);
+    lora_packet[11] = (unsigned char)lowbyte;
+    lora_packet[12] = (unsigned char)highbyte;
+    Serial.println("alt done");
+    uint16_t humidityInt = humidity * 100; // convert to signed 16 bits integer
+    lowbyte = lowByte(humidityInt);
+    highbyte = highByte(humidityInt);
+    lora_packet[13] = (unsigned char)lowbyte;
+    lora_packet[14] = (unsigned char)highbyte;
+    Serial.println("humidity done");
   }
 }
 
