@@ -503,46 +503,49 @@ void prepare_packet(void) {
     // Payload
 
     lora_packet[0] = (unsigned char)ERROR_FLAGS;
-    Serial.println("error flag done");
-    Serial.println("error flag done");
+    Serial.print("error flag is: ");Serial.println(SD_ERROR);
     packet_data = String("SD Error flag is: ") + String(SD_ERROR);
     writeToSDCard(packet_data);
     lowbyte = lowByte(batlevel);
     highbyte = highByte(batlevel);
     lora_packet[1] = (unsigned char)lowbyte; //we're unsigned
     lora_packet[2] = (unsigned char)highbyte;
-    Serial.println("batt done");
     lowbyte = lowByte(distance);
     highbyte = highByte(distance);
     lora_packet[3] = (unsigned char)lowbyte;
     lora_packet[4] = (unsigned char)highbyte;
-    Serial.println("dist done");
     int16_t celciusInt = temperature * 100; // convert to signed 16 bits integer
     lowbyte = lowByte(celciusInt);
     highbyte = highByte(celciusInt);
     lora_packet[5] = (unsigned char)lowbyte;
     lora_packet[6] = (unsigned char)highbyte;
-    Serial.println("temp done");
-    uint16_t pressureInt = pressure * 100; // convert to unsigned 16 bits integer
-    lowbyte = lowByte(pressureInt);
-    highbyte = highByte(pressureInt);
-    lora_packet[7] = (uint8_t)(pressureInt & 0x000000ff);
-    lora_packet[8] = (uint8_t)(pressureInt & 0x0000ff00) >> 8;
-    lora_packet[9] = (uint8_t)(pressureInt & 0x00ff0000) >> 16;
-    lora_packet[10] = (uint8_t)(pressureInt & 0xff000000) >> 24;
-    Serial.println("press done");
+    Serial.print("temp in Celcius is: ");Serial.println(temperature);
+    packet_data = String("temp in Celcius is: ") + String(temperature);
+    writeToSDCard(packet_data);
+    uint32_t pressureInt = pressure * 100; // convert to unsigned 16 bits integer
+    lora_packet[7] = (pressureInt & 0x000000ff);
+    lora_packet[8] = (pressureInt & 0x0000ff00) >> 8;
+    lora_packet[9] = (pressureInt & 0x00ff0000) >> 16;
+    lora_packet[10] = (pressureInt & 0xff000000) >> 24;
+    Serial.println("Pressure in hPa: ");Serial.println(pressure);
+    packet_data = String("Pressure in hPa is: ") + String(pressure);
+    writeToSDCard(packet_data);
     uint16_t altitudeInt = altitude * 100; // convert to signed 16 bits integer
     lowbyte = lowByte(altitudeInt);
     highbyte = highByte(altitudeInt);
     lora_packet[11] = (unsigned char)lowbyte;
     lora_packet[12] = (unsigned char)highbyte;
-    Serial.println("alt done");
+    Serial.print("alt in m is:");Serial.println(altitude);
+    packet_data = String("temp in Celcius is: ") + String(altitude);
+    writeToSDCard(packet_data);
     uint16_t humidityInt = humidity * 100; // convert to signed 16 bits integer
     lowbyte = lowByte(humidityInt);
     highbyte = highByte(humidityInt);
     lora_packet[13] = (unsigned char)lowbyte;
     lora_packet[14] = (unsigned char)highbyte;
-    Serial.println("humidity done");
+    Serial.println("humidity is: ");Serial.println(humidity);
+    packet_data = String("humidity is: ") + String(humidity);
+    writeToSDCard(packet_data);
   }
 }
 

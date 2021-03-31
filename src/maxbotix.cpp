@@ -40,7 +40,7 @@ uint16_t sensor_singleread(void) {
   digitalWrite(triggerPin, HIGH);
   delayMicroseconds(20);            //Pin 4 ned to be pulled High for a minimum of 20 microseconds.
   digitalWrite(triggerPin, LOW);
-  delay(150);
+  delay(250);
   if (Serial1.available() > 0) {
     do {
       if (Serial1.read() == 'R') {
