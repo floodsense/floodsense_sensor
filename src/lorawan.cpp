@@ -16,6 +16,11 @@ unsigned int TX_INTERVAL;
 
 Adafruit_BME280 bme; // I2C
 
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+float t1;
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
 unsigned char cfg_packet[7];
 unsigned char lora_packet[15];
 bool TX_COMPLETED = false;        // Set to false on start and after sleep; is set to true when an uplink is successful
@@ -48,16 +53,18 @@ void lmicsetup( unsigned int packet_interval = 300) {       //Future setup varia
   LMIC_setDrTxpow(DR_SF7, 14);
   LMIC_selectSubBand(1);
   digitalWrite(13, LOW);
-  Serial.println(F("BME280 test"));
-  unsigned status = bme.begin(0x76, &Wire);
-  if (!status) {
-        Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
-        Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
-        Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-        Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-        Serial.print("        ID of 0x60 represents a BME 280.\n");
-        Serial.print("        ID of 0x61 represents a BME 680.\n");
-  }
+
+  // unsigned status = bme.begin(0x76, &Wire);
+  // if (!status) {
+  //       Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+  //       Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
+  //       Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+  //       Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+  //       Serial.print("        ID of 0x60 represents a BME 280.\n");
+  //       Serial.print("        ID of 0x61 represents a BME 680.\n");
+  // }
+  Serial.println(F("MLX setting up..."));
+  mlx.begin();
   Serial.println("Setup Ready!");
   TX_INTERVAL = packet_interval;
   // Start job (sending automatically starts OTAA too)
@@ -493,14 +500,16 @@ void prepare_packet(void) {
     packet_data = String("Battery Level in mVolts is: ") + String(batlevel);
     writeToSDCard(packet_data);
 
-    // BME280
-    Serial.println("Reading BME.....");
-    float temperature = bme.readTemperature();
-    float pressure = bme.readPressure() / 100.0F;
-    float altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
-    float humidity = bme.readHumidity();
-    Serial.println("Reads done");
+    // // BME280
+    // Serial.println("Reading BME.....");
+    // float temperature = bme.readTemperature();
+    // float pressure = bme.readPressure() / 100.0F;
+    // float altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+    // float humidity = bme.readHumidity();
+    // Serial.println("Reads done");
     // Payload
+
+    float temperature = mlx.readAmbientTempC();
 
     lora_packet[0] = (unsigned char)ERROR_FLAGS;
     Serial.print("error flag is: ");Serial.println(SD_ERROR);
@@ -522,7 +531,7 @@ void prepare_packet(void) {
     Serial.print("temp in Celcius is: ");Serial.println(temperature);
     packet_data = String("temp in Celcius is: ") + String(temperature);
     writeToSDCard(packet_data);
-    uint32_t pressureInt = pressure * 100; // convert to unsigned 16 bits integer
+    uint32_t pressureInt = 0; // convert to unsigned 16 bits integer
     lora_packet[7] = (pressureInt & 0x000000ff);
     lora_packet[8] = (pressureInt & 0x0000ff00) >> 8;
     lora_packet[9] = (pressureInt & 0x00ff0000) >> 16;
@@ -530,7 +539,7 @@ void prepare_packet(void) {
     Serial.println("Pressure in hPa: ");Serial.println(pressure);
     packet_data = String("Pressure in hPa is: ") + String(pressure);
     writeToSDCard(packet_data);
-    uint16_t altitudeInt = altitude * 100; // convert to signed 16 bits integer
+    uint16_t altitudeInt = 0; // convert to signed 16 bits integer
     lowbyte = lowByte(altitudeInt);
     highbyte = highByte(altitudeInt);
     lora_packet[11] = (unsigned char)lowbyte;
@@ -538,7 +547,7 @@ void prepare_packet(void) {
     Serial.print("alt in m is:");Serial.println(altitude);
     packet_data = String("temp in Celcius is: ") + String(altitude);
     writeToSDCard(packet_data);
-    uint16_t humidityInt = humidity * 100; // convert to signed 16 bits integer
+    uint16_t humidityInt = 0; // convert to signed 16 bits integer
     lowbyte = lowByte(humidityInt);
     highbyte = highByte(humidityInt);
     lora_packet[13] = (unsigned char)lowbyte;
