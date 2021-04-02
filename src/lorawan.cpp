@@ -503,7 +503,7 @@ void prepare_packet(void) {
     // // BME280
     // Serial.println("Reading BME.....");
     // float temperature = bme.readTemperature();
-    // float pressure = bme.readPressure() / 100.0F;
+    float pressure, altitude, humidity;
     // float altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
     // float humidity = bme.readHumidity();
     // Serial.println("Reads done");
