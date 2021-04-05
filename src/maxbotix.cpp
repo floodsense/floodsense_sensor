@@ -40,7 +40,7 @@ uint16_t sensor_singleread(void) {
   digitalWrite(triggerPin, HIGH);
   delayMicroseconds(20);            //Pin 4 ned to be pulled High for a minimum of 20 microseconds.
   digitalWrite(triggerPin, LOW);
-  delay(250);
+  delay(150);
   if (Serial1.available() > 0) {
     do {
       if (Serial1.read() == 'R') {
@@ -85,31 +85,34 @@ uint16_t read_sensor_using_modes(unsigned int sensorMode, unsigned int sensor_sa
   }
   Serial.println("");
   writeToSDCard(readings_array_string);
-  readings_array_string = ""; //Cleaning readings array string
 
   switch (sensorMode) {
     case 1:
       // Mean
       distance = mean(readings_arr, n, sensor_numberOfReadings);
       Serial.print("Mean is: "); Serial.println(distance);
-      writeToSDCard(String("Mean is: " + distance));
+      readings_array_string = String("Mean is: " + distance);
+      writeToSDCard(readings_array_string);
       break;
     case 2:
       // Median
       distance = median(readings_arr, n, sensor_numberOfReadings);
       Serial.print("Median is: "); Serial.println(distance);
-      writeToSDCard(String("Median is: " + distance));
+      readings_array_string = String("Median is: " + distance);
+      writeToSDCard(readings_array_string);
       break;
     case 3:
       // Mode
       distance = mode(readings_arr, n, sensor_numberOfReadings);
       Serial.print("Mode is: "); Serial.println(distance);
-      writeToSDCard(String("Mode is: " + distance));
+      readings_array_string = String("Mode is: " + distance);
+      writeToSDCard(readings_array_string);
     default:
       // Single Pulse-In single reading
       distance = sensor_singleread();
       Serial.print("Default single reading is: "); Serial.println(distance);
-      writeToSDCard(String("Default single reading is: " + distance));
+      readings_array_string = String("Default single reading is: " + distance);
+      writeToSDCard(readings_array_string);
   }
   Serial.println("Cleaning measurements array...");
   writeToSDCard(String("Cleaning measurements array..."));
