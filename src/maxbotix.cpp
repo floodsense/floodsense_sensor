@@ -19,19 +19,15 @@ void setup_maxbotix(unsigned int mode=2, unsigned int sampling_rate=250 , unsign
   digitalWrite(triggerPin, LOW);
   Serial1.begin(9600);
   Serial.println("Sensor Settings:");
-  writeToSDCard(String("Sensor Settings:"));
   sensorMode = mode;
   Serial.print("    Sensor mode: ");
   Serial.println(sensorMode);
-  writeToSDCard(String("    Sensor mode: "+ sensorMode));
   sensor_sampling_rate = sampling_rate;
   Serial.print("    Sensor sampling rate: ");
   Serial.println(sensor_sampling_rate);
-  writeToSDCard(String("    Sensor sampling rate: "+ sensor_sampling_rate));
   sensor_numberOfReadings = numberOfReadings;
   Serial.print("    Number of readings per measurement: ");
   Serial.println(sensor_numberOfReadings);
-  writeToSDCard(String("    Number of readings per measurement: "+ sensor_numberOfReadings));
 }
 
 uint16_t sensor_singleread(void) {
