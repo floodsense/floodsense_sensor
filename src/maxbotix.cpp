@@ -19,19 +19,15 @@ void setup_maxbotix(unsigned int mode=2, unsigned int sampling_rate=250 , unsign
   digitalWrite(triggerPin, LOW);
   Serial1.begin(9600);
   Serial.println("Sensor Settings:");
-  writeToSDCard(String("Sensor Settings:"));
   sensorMode = mode;
   Serial.print("    Sensor mode: ");
   Serial.println(sensorMode);
-  writeToSDCard(String("    Sensor mode: "+ sensorMode));
   sensor_sampling_rate = sampling_rate;
   Serial.print("    Sensor sampling rate: ");
   Serial.println(sensor_sampling_rate);
-  writeToSDCard(String("    Sensor sampling rate: "+ sensor_sampling_rate));
   sensor_numberOfReadings = numberOfReadings;
   Serial.print("    Number of readings per measurement: ");
   Serial.println(sensor_numberOfReadings);
-  writeToSDCard(String("    Number of readings per measurement: "+ sensor_numberOfReadings));
 }
 
 uint16_t sensor_singleread(void) {
@@ -91,25 +87,19 @@ uint16_t read_sensor_using_modes(unsigned int sensorMode, unsigned int sensor_sa
     case 1:
       // Mean
       distance = mean(readings_arr, n, sensor_numberOfReadings);
-      Serial.print("Mean is: "); Serial.println(distance);
-      writeToSDCard(String("Mean is: " + distance));
       break;
     case 2:
       // Median
       distance = median(readings_arr, n, sensor_numberOfReadings);
-      Serial.print("Median is: "); Serial.println(distance);
-      writeToSDCard(String("Median is: " + distance));
       break;
     case 3:
       // Mode
       distance = mode(readings_arr, n, sensor_numberOfReadings);
-      Serial.print("Mode is: "); Serial.println(distance);
-      writeToSDCard(String("Mode is: " + distance));
+      break;
     default:
       // Single Pulse-In single reading
       distance = sensor_singleread();
-      Serial.print("Default single reading is: "); Serial.println(distance);
-      writeToSDCard(String("Default single reading is: " + distance));
+      break;
   }
   Serial.println("Cleaning measurements array...");
   writeToSDCard(String("Cleaning measurements array..."));
