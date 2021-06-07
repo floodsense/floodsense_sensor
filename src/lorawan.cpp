@@ -173,8 +173,10 @@ void onEvent (ev_t ev) {
       count = count+1;
       Serial.println(count);
       Serial.println("");
-      if (count>200000000) {
+      if (count>2) {
         Serial.println("About to go to deep sleep and no critical jobsjvdhkgvxvcjcbxb");
+        while(!os_queryTimeCriticalJobs(ms2osticksRound(29000) ) && TX_COMPLETED == true )
+        {os_runloop_once();}        
         static   u1_t PROGMEM APPEUI11[8]= {0x22, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
         static  u1_t PROGMEM DEVEUI11[8]= {0x22, 0xBB, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
         static  u1_t PROGMEM APPKEY11[16] = {0x95, 0x41, 0xEB, 0x2A, 0xAC, 0xCD, 0x9E, 0x9B, 0xE4, 0x2E, 0x2F, 0x9F, 0xFC, 0x5D, 0x16, 0x9D};
