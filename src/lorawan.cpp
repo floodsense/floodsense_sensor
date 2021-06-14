@@ -17,9 +17,9 @@ bool TX_COMPLETED = false;
       // Set to false on start and after sleep; is set to true when an uplink is successful
 bool UPDATE_CONFIG = true;
 int count = 0;       // Set to true at start and when there is a change in sensor cfg; used to send sensor cfg via uplink
-static   u1_t PROGMEM APPEUI11[8]= {0x33, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-static  u1_t PROGMEM DEVEUI11[8]= {0x33, 0xBB, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-static  u1_t PROGMEM APPKEY11[16] = {0xE8, 0xF3, 0x44, 0x42, 0xBB, 0xDA, 0x06, 0x6B, 0x15, 0x5B, 0x1C, 0x3D, 0xEC, 0x0E, 0xF0, 0x1F};
+static   u1_t PROGMEM APPEUI11[8]= {};
+static  u1_t PROGMEM DEVEUI11[8]= {};
+static  u1_t PROGMEM APPKEY11[16] = {};
 void os_getArtEui (u1_t* buf) {
   memcpy_P(buf, APPEUI11, 8);
 }
@@ -177,9 +177,9 @@ void onEvent (ev_t ev) {
         Serial.println("About to go to deep sleep and no critical jobsjvdhkgvxvcjcbxb");
         while(!os_queryTimeCriticalJobs(ms2osticksRound(29000) ) && TX_COMPLETED == true )
         {os_runloop_once();}        
-        static   u1_t PROGMEM APPEUI11[8]= {0x22, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-        static  u1_t PROGMEM DEVEUI11[8]= {0x22, 0xBB, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-        static  u1_t PROGMEM APPKEY11[16] = {0x95, 0x41, 0xEB, 0x2A, 0xAC, 0xCD, 0x9E, 0x9B, 0xE4, 0x2E, 0x2F, 0x9F, 0xFC, 0x5D, 0x16, 0x9D};
+        static   u1_t PROGMEM APPEUI11[8]= {};//new keys
+        static  u1_t PROGMEM DEVEUI11[8]= {};
+        static  u1_t PROGMEM APPKEY11[16] = {};
         os_init();
         LMIC_reset();
         prepare_packet();
