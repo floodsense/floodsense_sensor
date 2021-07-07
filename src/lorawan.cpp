@@ -7,12 +7,12 @@
 #include "maxbotix.h"
 #include <math.h>
 #include <SdFat.h>
-SdFat sd1;
-SdFile myFile;
+
+
 static osjob_t sendjob;
 //const int chipSelect = 10;
 unsigned int TX_INTERVAL;
-u1_t PROGMEM APPEUI11[8]={};
+
 unsigned char cfg_packet[7];
 unsigned char lora_packet[5];
 bool TX_COMPLETED = false;
@@ -22,18 +22,17 @@ int count =0;
 
 
 
-static  u1_t PROGMEM DEVEUI11[8]= {0xAF, 0xAF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-static  u1_t PROGMEM APPKEY11[16] = {0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6, 0xB6};
+
 void os_getArtEui (u1_t* buf) {
-  memcpy_P(buf, APPEUI11, 8);
+  memcpy_P(buf, APPEUI, 8);
 }
 
 void os_getDevEui (u1_t* buf) {
-  memcpy_P(buf, DEVEUI11, 8);
+  memcpy_P(buf, DEVEUI, 8);
 }
 
 void os_getDevKey (u1_t* buf) {
-  memcpy_P(buf, APPKEY11, 16);
+  memcpy_P(buf, APPKEY, 16);
 }
 
 void lmicsetup( unsigned int packet_interval = 300) {       //Future setup variables
@@ -52,30 +51,8 @@ void lmicsetup( unsigned int packet_interval = 300) {       //Future setup varia
   LMIC_selectSubBand(1);
   digitalWrite(13, LOW);
   //
-  digitalWrite(8, HIGH);
-  Serial.begin(9600);
-  if (!sd1.begin(chipSelect, SPI_HALF_SPEED)) {sd1.initErrorHalt();}
-  if (!myFile.open("one.txt", O_READ)) {
-    sd1.errorHalt("opening test.txt for read failed");
-  }
-  int data;
-  char data1;
-  uint8_t lo[8];
-  int f=0;
-  String temp;
-  String temp1;
-  int j=0;
-  while ((data = myFile.read()) >= 0){data1=data;
-  if(data == 44){int t = temp1.toInt();
-  temp1="";
-  lo[j]=t;
-  APPEUI11[j]=t;
-  j=j+1;
-Serial.println(t);}
-  else{temp1.concat(data1);}
-  }
-  myFile.close();
-  digitalWrite(8, HIGH);
+  int j=1;
+  APPEUI=readkey(j);
   //
   Serial.println("Setup Ready!");
   TX_INTERVAL = packet_interval;
@@ -222,22 +199,10 @@ void onEvent (ev_t ev) {
       count =count+1;
       Serial.println(count);
       if(count==5){
-        digitalWrite(8, HIGH);
-        if (!myFile.open("one.txt", O_RDWR | O_CREAT | O_AT_END)) {
-    sd1.errorHalt("opening test.txt for write failed");
-  }
-        uint8_t  ll[8] = {0xAF, 0xAB, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
-        String la ;
-        for(int i =0;i<8;i++){
-          la.concat(String(ll[i]));
-          la.concat(",");}
+        String filew="one.txt";
+          uint8_t  ll[8] = {0xAF, 0xAB, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+        writekey(filew,ll);
 
-          myFile.rewind();
-          myFile.println(la);
-          myFile.close();
-          Serial.println("done.");
-         digitalWrite(8, LOW);
-         Watchdog.enable(40);
       }
       break;
     case EV_LOST_TSYNC:
