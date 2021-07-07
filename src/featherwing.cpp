@@ -7,6 +7,7 @@ int SD_ERROR = 0;
 // file system object
 SdFat sd;
 SdFile file;
+SdFile myFile;
 // create Serial stream
 ArduinoOutStream cout(Serial);
 
@@ -81,4 +82,55 @@ void writeToSDCard(String StringtobeWritten) {
     }
   }
   digitalWrite(8, LOW);
+}
+uint8_t readkey(int m){
+  digitalWrite(8, HIGH);
+  Serial.begin(9600);
+  if (!sd.begin(chipSelect, SPI_HALF_SPEED)) {sd.initErrorHalt();}
+
+  if(m==1){if (!myFile.open("one.txt", O_READ)) {
+    sd.errorHalt("opening file one for read failed");
+  }}
+  if(m==2){if (!myFile.open("two.txt", O_READ)) {
+    sd.errorHalt("opening file two for read failed");
+  }}
+
+  int data;
+  char data1;
+  uint8_t lo[8];
+  uint8_t APPEUI11[8];
+  int f=0;
+  String temp;
+  String temp1;
+  int j=0;
+  while ((data = myFile.read()) >= 0){data1=data;
+  if(data == 44){int t = temp1.toInt();
+  temp1="";
+  lo[j]=t;
+  APPEUI11[j]=t;
+  j=j+1;
+Serial.println(t);}
+  else{temp1.concat(data1);}
+  }
+  myFile.close();
+  digitalWrite(8, HIGH);
+  return APPEUI11;
+}
+void writekey(int j,uint8_t ll[8]){
+  digitalWrite(8, HIGH);
+  if (!myFile.open(filename, O_RDWR | O_CREAT | O_AT_END)) {
+sd.errorHalt("opening test.txt for write failed");
+}
+
+  String la ;
+  for(int i =0;i<8;i++){
+    la.concat(String(ll[i]));
+    la.concat(",");}
+
+    myFile.rewind();
+    myFile.println(la);
+    myFile.close();
+    Serial.println("done.");
+   digitalWrite(8, LOW);
+   Watchdog.enable(40);
 }
