@@ -82,4 +82,3 @@ void writeToSDCard(String StringtobeWritten) {
   }
   digitalWrite(8, LOW);
 }
-{"mode":"full","isActive":false}
