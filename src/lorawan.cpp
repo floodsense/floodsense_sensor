@@ -47,55 +47,6 @@ FlashStorage(NEW_APPEUI_7, uint8_t);
 
 SelectAppEUI selection;
 
-void ChooseAppEUI(void){
-        selection = USE_ORIG.read();
-        if (!selection.init_) {
-                // First time setup...
-                Serial.println("First time setup, Storing the original AppEUI...");
-                // set useOrigApp to 'y'
-                selection.useOrigApp = 'y';
-                selection.init_ = true;
-                USE_ORIG.write(selection);
-                // Save APPEUI in the Flash Memory
-                ORIG_APPEUI_0.write(APPEUI[0]);
-                ORIG_APPEUI_1.write(APPEUI[1]);
-                ORIG_APPEUI_2.write(APPEUI[2]);
-                ORIG_APPEUI_3.write(APPEUI[3]);
-                ORIG_APPEUI_4.write(APPEUI[4]);
-                ORIG_APPEUI_5.write(APPEUI[5]);
-                ORIG_APPEUI_6.write(APPEUI[6]);
-                ORIG_APPEUI_7.write(APPEUI[7]);
-                Serial.println("Original AppEUI saved in the Flash Memory.");
-        } else {
-                // Original Key is already stored
-                // Check if there is an AppEUI update
-                Serial.println("Checking if there is an AppEUI update....");
-                if (selection.useOrigApp == 'n') {
-                        if ( NEW_APPEUI_0.read() != 0 && NEW_APPEUI_1.read() != 0 && NEW_APPEUI_2.read() != 0 && NEW_APPEUI_3.read() != 0 && NEW_APPEUI_4.read() != 0 && NEW_APPEUI_5.read() != 0 && NEW_APPEUI_6.read() != 0 && NEW_APPEUI_7.read() != 0) {
-                                // load new keys
-                                Serial.println("New AppEUI found");
-                                APPEUI[0] = NEW_APPEUI_0.read();
-                                APPEUI[1] = NEW_APPEUI_1.read();
-                                APPEUI[2] = NEW_APPEUI_2.read();
-                                APPEUI[3] = NEW_APPEUI_3.read();
-                                APPEUI[4] = NEW_APPEUI_4.read();
-                                APPEUI[5] = NEW_APPEUI_5.read();
-                                APPEUI[6] = NEW_APPEUI_6.read();
-                                APPEUI[7] = NEW_APPEUI_7.read();
-                                Serial.println("New AppEUI loaded.");
-                        } else {
-                                Serial.println("Key is zeroes and not valid. Using the original AppEUI");
-                                // key is zeroes and not valid
-                                selection.useOrigApp = 'y';
-                                USE_ORIG.write(selection);
-                        }
-                } else {
-                        Serial.println("No valid AppEUI found, using the default AppEUI...");
-                }
-        }
-}
-
-
 void JoinFailCounter(void) {
         joinFailCounter = joinFailCounter + 1;
 }
@@ -336,17 +287,17 @@ void ModifySensorSettings(void){
 }
 
 void ModifyAppEUI(void){
-  NEW_APPEUI_0.write(LMIC.frame[LMIC.dataBeg + 1]);
-  NEW_APPEUI_1.write(LMIC.frame[LMIC.dataBeg + 2]);
-  NEW_APPEUI_2.write(LMIC.frame[LMIC.dataBeg + 3]);
-  NEW_APPEUI_3.write(LMIC.frame[LMIC.dataBeg + 4]);
-  NEW_APPEUI_4.write(LMIC.frame[LMIC.dataBeg + 5]);
-  NEW_APPEUI_5.write(LMIC.frame[LMIC.dataBeg + 6]);
-  NEW_APPEUI_6.write(LMIC.frame[LMIC.dataBeg + 7]);
-  NEW_APPEUI_7.write(LMIC.frame[LMIC.dataBeg + 8]);
-  selection.useOrigApp = 'n';    // Use new AppEUI on restart
-  USE_ORIG.write(selection);     // Save the choice to Flash Memory
-  Watchdog.enable(1000);         // Restart to start OTAA again
+        NEW_APPEUI_0.write(LMIC.frame[LMIC.dataBeg + 1]);
+        NEW_APPEUI_1.write(LMIC.frame[LMIC.dataBeg + 2]);
+        NEW_APPEUI_2.write(LMIC.frame[LMIC.dataBeg + 3]);
+        NEW_APPEUI_3.write(LMIC.frame[LMIC.dataBeg + 4]);
+        NEW_APPEUI_4.write(LMIC.frame[LMIC.dataBeg + 5]);
+        NEW_APPEUI_5.write(LMIC.frame[LMIC.dataBeg + 6]);
+        NEW_APPEUI_6.write(LMIC.frame[LMIC.dataBeg + 7]);
+        NEW_APPEUI_7.write(LMIC.frame[LMIC.dataBeg + 8]);
+        selection.useOrigApp = 'n'; // Use new AppEUI on restart
+        USE_ORIG.write(selection); // Save the choice to Flash Memory
+        Watchdog.enable(1000);   // Restart to start OTAA again
 }
 
 void process_received_downlink(void) {
@@ -573,6 +524,46 @@ void onEvent (ev_t ev) {
         }
 }
 
+void InitStoreAPPEUI(void){
+
+        Serial.println("First time setup, Storing the original AppEUI...");
+        // set useOrigApp to 'y'
+        selection.useOrigApp = 'y';
+        selection.init_ = true;
+        USE_ORIG.write(selection);
+        // Save APPEUI in the Flash Memory
+        ORIG_APPEUI_0.write(APPEUI[0]);
+        ORIG_APPEUI_1.write(APPEUI[1]);
+        ORIG_APPEUI_2.write(APPEUI[2]);
+        ORIG_APPEUI_3.write(APPEUI[3]);
+        ORIG_APPEUI_4.write(APPEUI[4]);
+        ORIG_APPEUI_5.write(APPEUI[5]);
+        ORIG_APPEUI_6.write(APPEUI[6]);
+        ORIG_APPEUI_7.write(APPEUI[7]);
+        Serial.println("Original AppEUI saved in the Flash Memory.");
+}
+
+void LoadNewAppEUI(void){
+        if ( NEW_APPEUI_0.read() != 0 && NEW_APPEUI_1.read() != 0 && NEW_APPEUI_2.read() != 0 && NEW_APPEUI_3.read() != 0 && NEW_APPEUI_4.read() != 0 && NEW_APPEUI_5.read() != 0 && NEW_APPEUI_6.read() != 0 && NEW_APPEUI_7.read() != 0) {
+                // load new keys
+                Serial.println("New AppEUI found");
+                APPEUI[0] = NEW_APPEUI_0.read();
+                APPEUI[1] = NEW_APPEUI_1.read();
+                APPEUI[2] = NEW_APPEUI_2.read();
+                APPEUI[3] = NEW_APPEUI_3.read();
+                APPEUI[4] = NEW_APPEUI_4.read();
+                APPEUI[5] = NEW_APPEUI_5.read();
+                APPEUI[6] = NEW_APPEUI_6.read();
+                APPEUI[7] = NEW_APPEUI_7.read();
+                Serial.println("New AppEUI loaded.");
+        } else {
+                Serial.println("Key is zeroes and not valid. Using the original AppEUI");
+                // key is zeroes and not valid
+                selection.useOrigApp = 'y';
+                USE_ORIG.write(selection);
+        }
+}
+
 void lmicsetup(unsigned int packet_interval = 300) {
         Serial.println(F("Setting up LoraWAN..."));
         digitalWrite(13, HIGH);
@@ -589,7 +580,14 @@ void lmicsetup(unsigned int packet_interval = 300) {
         TX_INTERVAL = packet_interval;
         Serial.println("Starting first job in setup");
         prepare_packet();
-        ChooseAppEUI();         // choose AppEUI
+        selection = USE_ORIG.read();
+        if (!selection.init_) {
+                // First time setup...
+                InitStoreAPPEUI();
+        }
+        if (selection.useOrigApp == 'n') {
+                LoadNewAppEUI();   // choose AppEUI
+        }
         do_send(&sendjob);      // Start job (sending automatically starts OTAA too)
 }
 
