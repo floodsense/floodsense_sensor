@@ -83,8 +83,6 @@ void JoinFailureDebug(void) {
 
 
 void os_getArtEui (u1_t* buf) {
-        // choose AppEUI
-        ChooseAppEUI();
         memcpy_P(buf, APPEUI, 8);
 }
 
@@ -525,7 +523,6 @@ void onEvent (ev_t ev) {
 }
 
 void InitStoreAPPEUI(void){
-
         Serial.println("First time setup, Storing the original AppEUI...");
         // set useOrigApp to 'y'
         selection.useOrigApp = 'y';
