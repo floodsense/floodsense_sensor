@@ -48,7 +48,7 @@ FlashStorage(NEW_APPEUI_7, uint8_t);
 SelectAppEUI selection;
 
 void ChooseAppEUI(void){
-        selection = SELECT_AppEUI.read();
+        selection = USE_ORIG.read();
         if (!selection.init_) {
                 // First time setup...
                 Serial.println("First time setup, Storing the original AppEUI...");
@@ -57,14 +57,14 @@ void ChooseAppEUI(void){
                 selection.init_ = true;
                 USE_ORIG.write(selection);
                 // Save APPEUI in the Flash Memory
-                ORIG_APPEUI_0.write(AppEUI[0]);
-                ORIG_APPEUI_1.write(AppEUI[1]);
-                ORIG_APPEUI_2.write(AppEUI[2]);
-                ORIG_APPEUI_3.write(AppEUI[3]);
-                ORIG_APPEUI_4.write(AppEUI[4]);
-                ORIG_APPEUI_5.write(AppEUI[5]);
-                ORIG_APPEUI_6.write(AppEUI[6]);
-                ORIG_APPEUI_7.write(AppEUI[7]);
+                ORIG_APPEUI_0.write(APPEUI[0]);
+                ORIG_APPEUI_1.write(APPEUI[1]);
+                ORIG_APPEUI_2.write(APPEUI[2]);
+                ORIG_APPEUI_3.write(APPEUI[3]);
+                ORIG_APPEUI_4.write(APPEUI[4]);
+                ORIG_APPEUI_5.write(APPEUI[5]);
+                ORIG_APPEUI_6.write(APPEUI[6]);
+                ORIG_APPEUI_7.write(APPEUI[7]);
                 Serial.println("Original AppEUI saved in the Flash Memory.");
         } else {
                 // Original Key is already stored
@@ -110,7 +110,7 @@ bool JoinFailed(void) {
 }
 
 void JoinFailureDebug(void) {
-        if(JoinFailed() && selection.useOrigApp == 'n'; ) {
+        if(JoinFailed() && selection.useOrigApp == 'n' ) {
                 // Use old AppEUI
                 selection.useOrigApp = 'y';
                 USE_ORIG.write(selection);
@@ -374,26 +374,6 @@ void process_received_downlink(void) {
         }
 }
 
-void lmicsetup(unsigned int packet_interval = 300) {
-        Serial.println(F("Setting up LoraWAN..."));
-        digitalWrite(13, HIGH);
-        // LMIC init
-        os_init();              // Reset the MAC state. Session and pending data transfers will be discarded.
-        LMIC_reset();
-        //LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
-        // Disable link check validation (automatically enabled)
-        LMIC_setLinkCheckMode(0);
-        LMIC_setDrTxpow(DR_SF7, 14);
-        LMIC_selectSubBand(1);
-        digitalWrite(13, LOW);
-        Serial.println("Setup Ready!");
-        TX_INTERVAL = packet_interval;
-        Serial.println("Starting first job in setup");
-        prepare_packet();
-        ChooseAppEUI();         // choose AppEUI
-        do_send(&sendjob);      // Start job (sending automatically starts OTAA too)
-}
-
 void do_send(osjob_t* j) {
         // Check if there is not a current TX/RX job running
         if (LMIC.opmode & OP_TXRXPEND) {
@@ -591,6 +571,26 @@ void onEvent (ev_t ev) {
                 writeToSDCard(event_ev);
                 break;
         }
+}
+
+void lmicsetup(unsigned int packet_interval = 300) {
+        Serial.println(F("Setting up LoraWAN..."));
+        digitalWrite(13, HIGH);
+        // LMIC init
+        os_init();              // Reset the MAC state. Session and pending data transfers will be discarded.
+        LMIC_reset();
+        //LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
+        // Disable link check validation (automatically enabled)
+        LMIC_setLinkCheckMode(0);
+        LMIC_setDrTxpow(DR_SF7, 14);
+        LMIC_selectSubBand(1);
+        digitalWrite(13, LOW);
+        Serial.println("Setup Ready!");
+        TX_INTERVAL = packet_interval;
+        Serial.println("Starting first job in setup");
+        prepare_packet();
+        ChooseAppEUI();         // choose AppEUI
+        do_send(&sendjob);      // Start job (sending automatically starts OTAA too)
 }
 
 void lorawan_runloop_once() {

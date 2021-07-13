@@ -9,7 +9,7 @@
 
 
 // This EUI must be in little-endian format
-static const u1_t PROGMEM APPEUI[8] = TTN_APPEUI ;
+static u1_t PROGMEM APPEUI[8] = TTN_APPEUI ;
 // This should also be in little endian format
 static const u1_t PROGMEM DEVEUI[8] = TTN_DEVEUI ;
 // This key should be in big endian format
